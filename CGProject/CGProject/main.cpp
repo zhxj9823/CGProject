@@ -1,19 +1,29 @@
-﻿#include <glad/glad.h>
+﻿#include<iostream>
+
+#define GLEW_STATIC
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <iostream>
+#include "game.h"
+#include "resource_manager.h"
 
+
+// GLFW function declerations
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void mouse_callback(GLFWwindow* window, int button, int actions, int mods);
+void cursor_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-// settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+// The Width of the screen
+const GLuint SCREEN_WIDTH = 1280;
+// The height of the screen
+const GLuint SCREEN_HEIGHT = 960;
 
-int main()
+Game game(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+int main(int argc, char *argv[])
 {
-	// glfw: initialize and configure
-	// ------------------------------
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -24,63 +34,149 @@ int main()
 #endif
 
 	// glfw window creation
-	// --------------------
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Game", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return -1;
-	}
+	}	
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetKeyCallback(window, key_callback);
+	glfwSetMouseButtonCallback(window, mouse_callback);
+	glfwSetCursorPosCallback(window, cursor_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
 	// glad: load all OpenGL function pointers
-	// ---------------------------------------
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
 
-	// render loop
-	// -----------
+	// OpenGL configuration
+	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// Initialize game
+	game.Init();
+
+	// DeltaTime variables
+	GLfloat deltaTime = 0.0f;
+	GLfloat lastFrame = 0.0f;
+
+	// Start Game within Menu State
+	game.State = GAME_ACTIVE;
+
 	while (!glfwWindowShouldClose(window))
 	{
-		// input
-		// -----
-		processInput(window);
-
-		// render
-		// ------
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-		// -------------------------------------------------------------------------------
-		glfwSwapBuffers(window);
+		// Calculate delta time
+		GLfloat currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
 		glfwPollEvents();
+
+		// deltaTime = 0.001f;
+		// Manage user input
+		game.ProcessInput(deltaTime);
+
+		// Update Game state
+		game.Update(deltaTime);
+
+		// Render
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		game.Render();
+
+		glfwSwapBuffers(window);
 	}
 
-	// glfw: terminate, clearing all previously allocated GLFW resources.
-	// ------------------------------------------------------------------
+	// Delete all resources as loaded using the resource manager
+	ResourceManager::Clear();
+
 	glfwTerminate();
 	return 0;
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window)
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
+	// When a user presses the escape key, we set the WindowShouldClose property to true, closing the application
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	if (key >= 0 && key < 1024)
+	{
+		if (action == GLFW_PRESS)
+			game.Keys[key] = GL_TRUE;
+		else if (action == GLFW_RELEASE)
+			game.Keys[key] = GL_FALSE;
+	}
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	// make sure the viewport matches the new window dimensions; note that width and 
 	// height will be significantly larger than specified on retina displays.
 	glViewport(0, 0, width, height);
+}
+
+// glfw: whenever the mouse present this callback is called
+void mouse_callback(GLFWwindow* window, int button, int actions, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT)
+	{
+		if (actions == GLFW_PRESS)
+		{
+			game.leftMouse = GL_TRUE;
+		}
+		if (actions == GLFW_RELEASE)
+		{
+			game.leftMouse = GL_FALSE;
+		}
+	}
+	if (button == GLFW_MOUSE_BUTTON_RIGHT)
+	{
+		if (actions == GLFW_PRESS)
+		{
+			game.rightMouse = GL_TRUE;
+		}
+		if (actions == GLFW_RELEASE)
+		{
+			game.rightMouse = GL_FALSE;
+		}
+	}	
+}
+
+// glfw: whenever the mouse moves, this callback is called
+void cursor_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	static bool firstMouse = true;
+	static GLfloat lastX = SCREEN_WIDTH / 2.0;
+	static GLfloat lastY = SCREEN_HEIGHT / 2.0;
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	GLfloat xoffset = xpos - lastX;
+	GLfloat yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+	lastX = xpos;
+	lastY = ypos;
+
+	game.ProcessMouseMovement(xoffset, yoffset);
+}
+
+// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	game.ProcessMouseScroll(yoffset);
 }
