@@ -41,6 +41,7 @@ public:
 	Camera cameras[2];
 	irrklang::ISoundEngine *SoundEngine;
 	TextRenderer *Text;
+	std::vector<GameObject> GameObjects;
 	// Constructor/Destructor
 	Game(GLuint width, GLuint height);
 	~Game();
