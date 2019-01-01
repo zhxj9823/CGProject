@@ -15,7 +15,7 @@ class GameObject
 {
 public:
 	// Object state
-	glm::vec3   Position, Velocity;
+	glm::vec3   Position, Velocity,Size;
 	GLboolean   Destroyed;
 	GameObject();
 	GameObject(glm::vec3 pos,glm::vec3 velocity =glm::vec3(0.0f,0.0f,0.0f));

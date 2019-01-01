@@ -2,6 +2,7 @@
 #define GAME_H
 #include <vector>
 #include <tuple>
+#include <list>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -12,6 +13,7 @@
 
 #include "text_renderer.h"
 
+#include "ParticleSystem.h"
 // Represents the current state of the game
 enum GameState {
 	GAME_ACTIVE,
@@ -24,6 +26,19 @@ enum GameView {
 	FIRST_PERSON,
 	THIRD_PERSON
 };
+
+struct explosionParticle {
+	ParticleGenerator* particleSystem;
+	GLfloat life;
+	glm::vec3 position;
+
+	explosionParticle(Shader shader, Texture2D texture, GLuint amount, GLfloat life, glm::vec3 pos)
+		:particleSystem(new ParticleGenerator(shader, texture, amount)), life(life), position(pos)
+	{
+
+	}
+};
+
 
 // Game holds all game-related state and functionality.
 // Combines all game-related data into a single class for
@@ -42,6 +57,7 @@ public:
 	irrklang::ISoundEngine *SoundEngine;
 	TextRenderer *Text;
 	std::vector<GameObject> GameObjects;
+	std::list<explosionParticle*> explosionParticles;
 	// Constructor/Destructor
 	Game(GLuint width, GLuint height);
 	~Game();
