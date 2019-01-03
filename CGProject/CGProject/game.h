@@ -11,6 +11,7 @@
 #include <irrKlang/irrKlang.h>
 
 #include "text_renderer.h"
+#include "renderer.h"
 
 // Represents the current state of the game
 enum GameState {
@@ -41,6 +42,7 @@ public:
 	Camera cameras[2];
 	irrklang::ISoundEngine *SoundEngine;
 	TextRenderer *Text;
+	Renderer *Plane;
 	std::vector<GameObject> GameObjects;
 	// Constructor/Destructor
 	Game(GLuint width, GLuint height);

@@ -7,5 +7,5 @@ GameObject::GameObject(glm::vec3 pos, glm::vec3 velocity): Position(pos), Veloci
 
  void GameObject::Draw()
 {
- 	
+	 //renderer.DrawSprite(this->Sprite, this->Position, this->Size, this->Rotation, this->Color);
 }

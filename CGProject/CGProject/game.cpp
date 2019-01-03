@@ -6,6 +6,7 @@
 #include "resource_manager.h"
 #include "game_object.h"
 
+
 Game::Game(GLuint width, GLuint height) : State(GAME_MENU), View(FIRST_PERSON), Keys(), Width(width), Height(height), leftMouse(GL_FALSE), rightMouse(GL_FALSE)
 {
 	for (int i = 0; i < 1024; i++)
@@ -33,11 +34,14 @@ void Game::Init()
 
 	Text = new TextRenderer(this->Width, this->Height);
 	Text->Load("fonts/ocraext.TTF", 24);
+
+	Plane = new Renderer();
+	Plane->Load();
 }
 
 void Game::Update(GLfloat dt)
 {
-	cameras[FIRST_PERSON].Position=
+	//cameras[FIRST_PERSON].Position=
 }
 
 
@@ -70,7 +74,8 @@ void Game::ProcessInput(GLfloat dt)
 
 void Game::Render()
 {
-	Text->RenderText("Press W or S to select level", 245.0f, Height / 2 + 20.0f, 0.75f);
+	Text->RenderText("Press W or S to select level", 245.0f, Height / 2 + 20.0f, 0.75f);        // Begin rendering to postprocessing quad
+	Plane->RenderPlane();
 }
 
 void Game::ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset)
