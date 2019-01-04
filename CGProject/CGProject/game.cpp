@@ -36,7 +36,7 @@ void Game::Init()
 	Text->Load("fonts/ocraext.TTF", 24);
 
 	Plane = new Renderer();
-	Plane->Load();
+	Plane->Load("model/su33.obj");
 }
 
 void Game::Update(GLfloat dt)

@@ -16,11 +16,11 @@ Renderer::Renderer()
 {
 	// Load and configure shader
 	this->ModelShader = ResourceManager::LoadShader("shaders/model_loading.vs", "shaders/model_loading.fs", nullptr, "text");
+	camera=Camera(glm::vec3(0.0f, 0.0f, 5.0f));
 }
 
-void Renderer::Load()
+void Renderer::Load(const char path[])
 {
-	char path[] = "model/su33.obj";
 	this->OurModel=Model(path);
 }
 
@@ -40,5 +40,4 @@ void Renderer::RenderPlane()
 	model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
 	ModelShader.SetMatrix4("model", model);
 	OurModel.Draw(ModelShader);
-
 }

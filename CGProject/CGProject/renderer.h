@@ -3,13 +3,13 @@
 
 #include <map>
 
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 
 #include "texture.h"
 #include "shader.h"
 #include "model.h"
 #include "camera.h"
-#include"resource_manager.h"
 
 
 // A renderer class for rendering text displayed by a font loaded using the 
@@ -24,7 +24,7 @@ public:
 	// Constructor
 	Renderer();
 	// Pre-compiles a list of characters from the given font
-	void Load();
+	void Load(const char path[]);
 	// Renders a string of text using the precompiled list of characters
 	void RenderPlane();
 private:
