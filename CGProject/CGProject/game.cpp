@@ -6,6 +6,9 @@
 #include "resource_manager.h"
 #include "game_object.h"
 
+Renderer *plane;
+GameObject *Player;
+
 
 Game::Game(GLuint width, GLuint height) : State(GAME_MENU), View(FIRST_PERSON), Keys(), Width(width), Height(height), leftMouse(GL_FALSE), rightMouse(GL_FALSE)
 {
@@ -35,8 +38,15 @@ void Game::Init()
 	Text = new TextRenderer(this->Width, this->Height);
 	Text->Load("fonts/ocraext.TTF", 24);
 
-	Plane = new Renderer();
-	Plane->Load("model/su33.obj");
+	// Load shaders
+	ResourceManager::LoadShader("shaders/model_loading.vs", "shaders/model_loading.fs", nullptr, "plane");
+	ResourceManager::LoadModel("su33/su33.obj", "plane");
+	plane = new Renderer(ResourceManager::GetShader("plane"), ResourceManager::GetModel("plane"));
+
+	glm::vec3 pos = glm::vec3(0.0f);
+	glm::vec3 size = glm::vec3(0.5f);
+	glm::vec3 v = glm::vec3(0.0f);
+	Player = new GameObject(pos,size,cameras[FIRST_PERSON],v);
 }
 
 void Game::Update(GLfloat dt)
@@ -74,8 +84,9 @@ void Game::ProcessInput(GLfloat dt)
 
 void Game::Render()
 {
-	Text->RenderText("Press W or S to select level", 245.0f, Height / 2 + 20.0f, 0.75f);        // Begin rendering to postprocessing quad
-	Plane->RenderPlane();
+	//Text->RenderText("Press W or S to select level", 245.0f, Height / 2 + 20.0f, 0.75f);        // Begin rendering to postprocessing quad
+	Player->camera = cameras[FIRST_PERSON];
+	Player->Draw(*plane);
 }
 
 void Game::ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset)

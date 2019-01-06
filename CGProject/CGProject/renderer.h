@@ -5,6 +5,7 @@
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "texture.h"
 #include "shader.h"
@@ -18,20 +19,12 @@
 class Renderer
 {
 public:
-	// Shader used for rendering
-	Shader ModelShader;
-	Model OurModel;
-	// Constructor
-	Renderer();
-	// Pre-compiles a list of characters from the given font
-	void Load(const char path[]);
-	// Renders a string of text using the precompiled list of characters
-	void RenderPlane();
+	Renderer(Shader shader, Model plane);
+	void DrawPlane(glm::vec3 position, glm::vec3 size, Camera camera);
 private:
 	// Render state
-	GLuint VAO, VBO;
-	Camera camera;
-
+	Shader shader;
+	Model plane;
 };
 
 #endif 
