@@ -23,6 +23,7 @@ public:
 	GameObject(glm::vec3 pos,glm::vec3 size,Camera camera,glm::vec3 velocity =glm::vec3(0.0f,0.0f,0.0f));
 	// Draw
 	virtual void Draw(Renderer & renderer);
+	glm::vec3 Move(GLfloat dt);
 };
 
 #endif

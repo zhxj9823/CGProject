@@ -7,6 +7,7 @@
 #include "game_object.h"
 
 Renderer *plane;
+GameObject *Enemy;
 GameObject *Player;
 
 
@@ -40,24 +41,29 @@ void Game::Init()
 
 	// Load shaders
 	ResourceManager::LoadShader("shaders/model_loading.vs", "shaders/model_loading.fs", nullptr, "plane");
-	ResourceManager::LoadModel("su33/su33.obj", "plane");
-	plane = new Renderer(ResourceManager::GetShader("plane"), ResourceManager::GetModel("plane"));
+	ResourceManager::LoadModel("su33/su33.obj", "su33");
+	plane = new Renderer(ResourceManager::GetShader("plane"), ResourceManager::GetModel("su33"));
 
 	glm::vec3 pos = glm::vec3(0.0f);
 	glm::vec3 size = glm::vec3(0.5f);
-	glm::vec3 v = glm::vec3(0.0f);
-	Player = new GameObject(pos,size,cameras[FIRST_PERSON],v);
+	glm::vec3 v = glm::vec3(0.0f, 0.0f, 0.1f);
+	Enemy = new GameObject(pos, size, cameras[FIRST_PERSON], v);
+	pos = cameras[FIRST_PERSON].Position;
+	v = glm::vec3(0.0f, 0.0f, -0.1f);
+	Player = new GameObject(pos, size, cameras[FIRST_PERSON], v);
 }
 
 void Game::Update(GLfloat dt)
 {
-	//cameras[FIRST_PERSON].Position=
+	cameras[FIRST_PERSON].Position += dt * Player->Velocity;
+	Enemy->Move(dt);
+	Player->Position = cameras[FIRST_PERSON].Position + glm::vec3(0.0f, -1.0f, -1.0f);
 }
 
 
 void Game::ProcessInput(GLfloat dt)
 {
-	if(State==GAME_ACTIVE)
+	if (State == GAME_ACTIVE)
 	{
 		if (Keys[GLFW_KEY_W])
 		{
@@ -75,23 +81,24 @@ void Game::ProcessInput(GLfloat dt)
 		{
 			cameras[View].ProcessKeyboard(RIGHT, dt);
 		}
-		if(Keys[GLFW_KEY_LEFT_SHIFT] || Keys[GLFW_KEY_RIGHT_SHIFT])
+		if (Keys[GLFW_KEY_LEFT_SHIFT] || Keys[GLFW_KEY_RIGHT_SHIFT])
 		{
-			View = (View == FIRST_PERSON)?THIRD_PERSON:FIRST_PERSON;
+			View = (View == FIRST_PERSON) ? THIRD_PERSON : FIRST_PERSON;
 		}
 	}
 }
 
 void Game::Render()
 {
-	//Text->RenderText("Press W or S to select level", 245.0f, Height / 2 + 20.0f, 0.75f);        // Begin rendering to postprocessing quad
-	Player->camera = cameras[FIRST_PERSON];
+	Text->RenderText("Press W or S to select level", 245.0f, Height / 2 + 20.0f, 0.75f);        // Begin rendering to postprocessing quad
+	Enemy->camera = cameras[FIRST_PERSON];
+	Enemy->Draw(*plane);
 	Player->Draw(*plane);
 }
 
 void Game::ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset)
 {
-	if(leftMouse)
+	if (leftMouse)
 	{
 		cameras[View].ProcessMouseMovement(xoffset, yoffset);
 	}
