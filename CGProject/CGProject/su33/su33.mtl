@@ -60,9 +60,9 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd Su33_tex06_eagle.bmp.dds
-map_Ka Su33_tex06_eagle.bmp.dds
-map_Ks Su33_tex06_eagle.bmp.dds
+map_Kd Su33_tex06_eagle.bmp.png
+map_Ka Su33_tex06_eagle.bmp.png
+map_Ks Su33_tex06_eagle.bmp.png
 
 newmtl kreslo
 Ns 96.078431

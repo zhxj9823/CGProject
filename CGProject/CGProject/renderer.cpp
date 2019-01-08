@@ -4,6 +4,7 @@
 const GLuint SCREEN_WIDTH = 1280;
 // The height of the screen
 const GLuint SCREEN_HEIGHT = 960;
+const GLuint PI = acos(-1);
 
 Renderer::Renderer(Shader shader, Model plane)
 {
@@ -11,7 +12,7 @@ Renderer::Renderer(Shader shader, Model plane)
 	this->plane = plane;
 }
 
-void Renderer::DrawPlane(glm::vec3 position, glm::vec3 size,Camera camera)
+void Renderer::DrawPlane(glm::vec3 position, glm::vec3 size, glm::vec3 Up, glm::vec3 Right, Camera & camera)
 {
 	// Activate corresponding render state	
 	this->shader.Use();
@@ -23,6 +24,14 @@ void Renderer::DrawPlane(glm::vec3 position, glm::vec3 size,Camera camera)
 
 	// render the loaded model
 	glm::mat4 model = glm::mat4(1.0f);
+	glm::vec3 r = glm::normalize(glm::cross(Right, Up));
+	glm::vec3 i = glm::vec3(0.0f, 0.0f, 1.0f);
+	glm::vec3 a = glm::cross(r, i);
+	model = glm::translate(model, -glm::vec3(0.0f, 1.8f, 3.0f));
+	/*if (a != glm::vec3(0.0f))
+		model = glm::rotate(model, acos(glm::dot(r, i)), a);
+	else
+		model = glm::rotate(model, acos(glm::dot(r, i)), glm::vec3(0.0f, 1.0f, 0.0f));*/
 	model = glm::translate(model, position); // translate it down so it's at the center of the scene
 	model = glm::scale(model, size);	// it's a bit too big for our scene, so scale it down
 	this->shader.SetMatrix4("model", model);

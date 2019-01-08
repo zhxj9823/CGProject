@@ -1,15 +1,17 @@
 #include <algorithm>
 #include <sstream>
 #include <iostream>
+#include <time.h>
 
 #include "game.h"
 #include "resource_manager.h"
 #include "game_object.h"
 
-Renderer *plane;
-GameObject *Enemy;
-GameObject *Player;
+#define EnemyNum 10
 
+Renderer *plane;
+GameObject *Enemy[EnemyNum];
+GameObject *Player;
 
 Game::Game(GLuint width, GLuint height) : State(GAME_MENU), View(FIRST_PERSON), Keys(), Width(width), Height(height), leftMouse(GL_FALSE), rightMouse(GL_FALSE)
 {
@@ -29,6 +31,8 @@ Game::~Game()
 
 void Game::Init()
 {
+	srand((unsigned)time(NULL));
+
 	SoundEngine = irrklang::createIrrKlangDevice();
 	if (!SoundEngine) {
 		std::cout << "Cannot play the sound" << std::endl;
@@ -42,22 +46,44 @@ void Game::Init()
 	// Load shaders
 	ResourceManager::LoadShader("shaders/model_loading.vs", "shaders/model_loading.fs", nullptr, "plane");
 	ResourceManager::LoadModel("su33/su33.obj", "su33");
+	//ResourceManager::LoadModel("F-35A/F-35A.obj", "F35A");
 	plane = new Renderer(ResourceManager::GetShader("plane"), ResourceManager::GetModel("su33"));
 
-	glm::vec3 pos = glm::vec3(0.0f);
+	glm::vec3 pos = cameras[FIRST_PERSON].Position;
 	glm::vec3 size = glm::vec3(0.5f);
-	glm::vec3 v = glm::vec3(0.0f, 0.0f, 0.1f);
-	Enemy = new GameObject(pos, size, cameras[FIRST_PERSON], v);
-	pos = cameras[FIRST_PERSON].Position;
-	v = glm::vec3(0.0f, 0.0f, -0.1f);
-	Player = new GameObject(pos, size, cameras[FIRST_PERSON], v);
+	glm::vec3 v = glm::vec3(0.0f, 0.0f, -0.1f);
+	Player = new GameObject(pos, size, v);
+	for (int i = 0; i < EnemyNum; i++) {
+		double t = rand();
+		double h = (rand() % 1000)/100 - 5;
+		pos = glm::vec3(100 * cos(t), h, 100 * sin(t));
+		t = rand();
+		double v1 = (rand() % 1000) / 100 + 3;
+		v = glm::vec3(v1*cos(t), 0, v1*sin(t));
+		Enemy[i] = new GameObject(pos, size, v);
+	}
 }
 
 void Game::Update(GLfloat dt)
 {
 	cameras[FIRST_PERSON].Position += dt * Player->Velocity;
-	Enemy->Move(dt);
-	Player->Position = cameras[FIRST_PERSON].Position + glm::vec3(0.0f, -1.0f, -1.0f);
+	for (int i = 0; i < EnemyNum; i++) {
+		Enemy[i]->Move(dt);
+		if (Enemy[i]->Destroyed || Enemy[i]->Distance(cameras[FIRST_PERSON].Position) > 100) {
+			delete Enemy[i];
+			glm::vec3 size = glm::vec3(0.5f);
+			double t = rand();
+			double h = (rand() % 1000) / 100 - 5;
+			glm::vec3 pos = glm::vec3(100 * cos(t), h, 100 * sin(t));
+			t = rand();
+			double v1 = (rand() % 1000) / 100 + 3;
+			glm::vec3 v = glm::vec3(v1*cos(t), 0, v1*sin(t));
+			Enemy[i] = new GameObject(pos, size, v);
+		}
+	}
+	Player->Position = cameras[FIRST_PERSON].Position;
+	Player->Up = cameras[FIRST_PERSON].PlaneUp;
+	Player->Right = cameras[FIRST_PERSON].PlaneRight;
 }
 
 
@@ -91,9 +117,10 @@ void Game::ProcessInput(GLfloat dt)
 void Game::Render()
 {
 	Text->RenderText("Press W or S to select level", 245.0f, Height / 2 + 20.0f, 0.75f);        // Begin rendering to postprocessing quad
-	Enemy->camera = cameras[FIRST_PERSON];
-	Enemy->Draw(*plane);
-	Player->Draw(*plane);
+	for (int i = 0; i < EnemyNum;i++) {
+		Enemy[i]->Draw(*plane, cameras[FIRST_PERSON]);
+	}
+	Player->Draw(*plane, cameras[FIRST_PERSON]);
 }
 
 void Game::ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset)

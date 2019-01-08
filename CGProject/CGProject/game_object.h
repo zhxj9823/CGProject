@@ -17,13 +17,14 @@ class GameObject
 public:
 	// Object state
 	glm::vec3   Position, Size, Velocity;
+	glm::vec3	Up, Right;
 	GLboolean   Destroyed;
-	Camera		camera;
 	GameObject();
-	GameObject(glm::vec3 pos,glm::vec3 size,Camera camera,glm::vec3 velocity =glm::vec3(0.0f,0.0f,0.0f));
+	GameObject(glm::vec3 pos, glm::vec3 size,glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f));
 	// Draw
-	virtual void Draw(Renderer & renderer);
+	virtual void Draw(Renderer & renderer,Camera & camera);
 	glm::vec3 Move(GLfloat dt);
+	double Distance(glm::vec3 center);
 };
 
 #endif

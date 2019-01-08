@@ -20,7 +20,7 @@ class Renderer
 {
 public:
 	Renderer(Shader shader, Model plane);
-	void DrawPlane(glm::vec3 position, glm::vec3 size, Camera camera);
+	void DrawPlane(glm::vec3 position, glm::vec3 size, glm::vec3 Up, glm::vec3 Right, Camera & camera);
 private:
 	// Render state
 	Shader shader;

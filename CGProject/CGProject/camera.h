@@ -32,6 +32,8 @@ public:
 	glm::vec3 Front;
 	glm::vec3 Up;
 	glm::vec3 Right;
+	glm::vec3 PlaneUp;
+	glm::vec3 PlaneRight;
 	glm::vec3 WorldUp;
 	// Euler Angles
 	GLfloat Yaw;
