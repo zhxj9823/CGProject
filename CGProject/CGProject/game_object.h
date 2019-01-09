@@ -3,9 +3,10 @@
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
-
-#include "texture.h"
-// #include "sprite_renderer.h"
+#include <glm/gtc/matrix_transform.hpp>
+ 
+#include "renderer.h"
+#include "camera.h"
 
 
 // Container object for holding all state relevant for a single
@@ -15,12 +16,15 @@ class GameObject
 {
 public:
 	// Object state
-	glm::vec3   Position, Velocity;
+	glm::vec3   Position, Size, Velocity;
+	glm::vec3	Up, Right;
 	GLboolean   Destroyed;
 	GameObject();
-	GameObject(glm::vec3 pos,glm::vec3 velocity =glm::vec3(0.0f,0.0f,0.0f));
-	// Draw sprite
-	virtual void Draw();
+	GameObject(glm::vec3 pos, glm::vec3 size,glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f));
+	// Draw
+	virtual void Draw(Renderer & renderer,Camera & camera);
+	glm::vec3 Move(GLfloat dt);
+	double Distance(glm::vec3 center);
 };
 
 #endif
