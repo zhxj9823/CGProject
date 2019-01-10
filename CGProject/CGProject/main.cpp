@@ -1,12 +1,11 @@
 ﻿#include<iostream>
 
-#define GLEW_STATIC
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include "game.h"
 #include "resource_manager.h"
-
+#include "glError.h"
 
 // GLFW function declerations
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -15,19 +14,15 @@ void mouse_callback(GLFWwindow* window, int button, int actions, int mods);
 void cursor_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-// The Width of the screen
-const GLuint SCREEN_WIDTH = 1280;
-// The height of the screen
-const GLuint SCREEN_HEIGHT = 960;
-
 Game game(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 int main(int argc, char *argv[])
 {
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE); // comment this line in a release build! 
 
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
@@ -58,9 +53,24 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+	// enable OpenGL debug context if context allows for debug context
+	GLint flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+	{
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); // makes sure errors are displayed synchronously
+		glDebugMessageCallback(glDebugOutput, nullptr);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+	}
+
 	// OpenGL configuration
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glFrontFace(GL_CCW);
 	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -91,7 +101,7 @@ int main(int argc, char *argv[])
 
 		// Render
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		game.Render();
 
 		glfwSwapBuffers(window);
