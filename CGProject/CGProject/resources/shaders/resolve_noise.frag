@@ -222,15 +222,15 @@ void main() {
     if(brightness > 500.0) {
         bright_color = vec4(fcolor.rgb, 1.0);
 	}
-
+	
 	//fcolor = bright_color;
 
 	//fcolor.rgb = vec3(ray_world);
 
 	//fcolor = vec4(vec3(texture(perlin1, vec3(x, y, 0.0)).r), 1.0);
 	//fcolor = vec4(vec3(texture(terrain_texture, vec2(gl_FragCoord.x / view_port.x, gl_FragCoord.y / view_port.y) * 6)), 1.0);
-	vec3 s = vec3(texture(cloud_structure, vec3(gl_FragCoord.x / view_port.x, gl_FragCoord.y / view_port.y, 0.5) * 2).r);
-	vec3 t = texture(cloud_texture, vec3(gl_FragCoord.x / view_port.x, gl_FragCoord.y / view_port.y, 0.59)).rrr * 1.2;
-	t = vec3(coverage(t.r));
+	// vec3 s = vec3(texture(cloud_structure, vec3(gl_FragCoord.x / view_port.x, gl_FragCoord.y / view_port.y, 0.5) * 2).r);
+	// vec3 t = texture(cloud_texture, vec3(gl_FragCoord.x / view_port.x, gl_FragCoord.y / view_port.y, 0.59)).rrr * 1.2;
+	// t = vec3(coverage(t.r));
 	//fcolor = vec4(t, 1.0);
 }

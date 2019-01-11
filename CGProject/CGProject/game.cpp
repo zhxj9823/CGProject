@@ -12,7 +12,7 @@ Game::Game(GLuint width, GLuint height) : State(GAME_MENU), Width(width), Height
 	{
 		Keys[i] = false;
 	}
-	cameras[0] = Camera(glm::vec3(0.0f, 0.0f, 10000.0f));
+	cameras[0] = Camera(glm::vec3(0.0f, 0.0f, 10.0f));
 	cameras[1] = Camera(glm::vec3(0.0f, 0.0f, 100.0f));
 }
 
@@ -198,12 +198,16 @@ void Game::ProcessInput(GLfloat dt)
 
 void Game::Render()
 {
+	std::cout<<"Rendering"<<std::endl;
 	glm::mat4 view = cameras[View].GetViewMatrix();
 	glm::mat4 projection = glm::perspective(glm::radians(cameras[View].Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 1000.0f);
+	//glm::mat4 model;
+	//model = glm::translate(model, glm::vec3(0.0f,-10.0f,0.0f));
 
 	ResourceManager::GetShader("resolve_shader").Use();
 	ResourceManager::GetShader("resolve_shader").SetMatrix4("view", view);
 	ResourceManager::GetShader("resolve_shader").SetMatrix4("proj", projection);
+	//ResourceManager::GetShader("resolve_shader").SetMatrix4("model", model);
 	ResourceManager::GetShader("resolve_shader").SetMatrix4("inv_view", glm::mat4(glm::inverse(view)));
 	ResourceManager::GetShader("resolve_shader").SetMatrix4("inv_proj", glm::mat4(glm::inverse(projection)));
 	ResourceManager::GetShader("resolve_shader").SetVector2f("view_port", glm::vec2(SCREEN_WIDTH, SCREEN_HEIGHT));
