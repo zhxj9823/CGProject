@@ -37,7 +37,7 @@ void Game::Init()
 
 void Game::Update(GLfloat dt)
 {
-	cameras[FIRST_PERSON].Position=
+	//cameras[FIRST_PERSON].Position=
 }
 
 
