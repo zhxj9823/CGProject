@@ -88,6 +88,7 @@ float cloud_sampling1(vec3 v, float delta) {
 	return 0.0;
 }
 
+
 float cast_scatter_ray(vec3 origin, vec3 dir, float t) {
 	float delta = 10.0;
 	float end = 50.0;
@@ -107,6 +108,7 @@ float cast_scatter_ray(vec3 origin, vec3 dir, float t) {
 	float value = scatter * phase;
 	return value;
 }	
+
 
 vec4 cast_ray(vec3 origin, vec3 dir) {
 	float delta_large = 20.0;
@@ -222,7 +224,7 @@ void main() {
     if(brightness > 500.0) {
         bright_color = vec4(fcolor.rgb, 1.0);
 	}
-	
+
 	//fcolor = bright_color;
 
 	//fcolor.rgb = vec3(ray_world);
