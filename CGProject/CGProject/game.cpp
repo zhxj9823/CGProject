@@ -23,8 +23,8 @@ Game::Game(GLuint width, GLuint height) : State(GAME_MENU), View(FIRST_PERSON), 
 	{
 		Keys[i] = false;
 	}
-	cameras[0] = Camera(glm::vec3(0.0f, 0.0f, 10.0f));
-	cameras[1] = Camera(glm::vec3(0.0f, 0.0f, 100.0f));
+	cameras[0] = Camera(FIRST_PERSON,glm::vec3(0.0f, 0.0f, 10.0f));
+	cameras[1] = Camera(THIRD_PERSON,glm::vec3(0.0f, 0.0f, 100.0f));
 }
 
 Game::~Game()
@@ -210,6 +210,7 @@ void Game::Render()
 	renderfar = 5000.0f;
 	glm::mat4 projection = glm::perspective(cameras[View].Zoom, (float)this->Width / (float)this->Height, rendernear, renderfar);
 	glm::mat4 view = cameras[View].GetViewMatrix();
+	glDisable(GL_DEPTH_TEST);
 	for (auto &es : explosionParticles)
 	{
 		if (es->life > 0)
@@ -217,6 +218,7 @@ void Game::Render()
 			es->particleSystem->draw(projection, view, cameras[View].Front, glm::vec3(10.0f));
 		}
 	}
+	glEnable(GL_DEPTH_TEST);
 }
 
 void Game::ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset)

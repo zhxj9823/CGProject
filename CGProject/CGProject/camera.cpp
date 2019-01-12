@@ -1,6 +1,6 @@
 #include "camera.h"
 
-Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+Camera::Camera(GameView t,glm::vec3 position, glm::vec3 up, float yaw, float pitch) : gameview(t),Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
 {
 	PlaneUp = glm::vec3(0.0f, 0.0f, 1.0f);
 	PlaneRight = glm::vec3(0.0f, 1.0f, 0.0f);
