@@ -129,6 +129,7 @@
     <ClCompile Include="game.cpp" />
     <ClCompile Include="game_object.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="glError.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
@@ -144,6 +145,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="game_object.h" />
+    <ClInclude Include="glError.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="PhysicsEngine.h" />

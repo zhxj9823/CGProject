@@ -7,6 +7,7 @@
 #include "resource_manager.h"
 #include "game_object.h"
 #include "PhysicsEngine.h"
+#include "glError.h"
 
 #define EnemyNum 10
 
@@ -104,6 +105,7 @@ void Game::Init()
 	ResourceManager::GetShader("plane").Use();
 	ResourceManager::GetShader("plane").SetInteger("diffuseTexture", 0);
 	ResourceManager::GetShader("plane").SetInteger("shadowMap", 1);
+	glGetError();
 }
 
 void Game::Update(GLfloat dt)
@@ -245,13 +247,13 @@ void Game::Render()
 	glm::mat4 lightSpaceMatrix;
 	float near_plane = 1.0f, far_plane = 7.5f;
 	lightProjection = glm::perspective(glm::radians(45.0f), (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT, near_plane, far_plane); // note that if you use a perspective projection matrix you'll have to change the light position as the current light position isn't enough to reflect the whole scene
-	//lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+	lightProjection = glm::ortho(-100.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
 	lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 	lightSpaceMatrix = lightProjection * lightView;
 	// render scene from light's point of view
 	ResourceManager::GetShader("simpleDepthShader").Use();
 	ResourceManager::GetShader("simpleDepthShader").SetMatrix4("lightSpaceMatrix", lightSpaceMatrix);
-
+	glGetError();
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -265,7 +267,7 @@ void Game::Render()
 	}
 	Player->Draw(ResourceManager::GetShader("simpleDepthShader"), *plane, cameras[FIRST_PERSON]);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+	glGetError();
 	// reset viewport
 	glViewport(0, 0, Width, Height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -294,7 +296,7 @@ void Game::Render()
 		misslee.Draw(ResourceManager::GetShader("plane"),*missle, cameras[FIRST_PERSON]);
 	}
 	Player->Draw(ResourceManager::GetShader("plane"),*plane, cameras[FIRST_PERSON]);
-
+	glGetError();
 	projection = glm::perspective(cameras[View].Zoom, (float)this->Width / (float)this->Height, rendernear, renderfar);
 	view = cameras[View].GetViewMatrix();
 	for (auto &es : explosionParticles)
@@ -304,6 +306,7 @@ void Game::Render()
 			es->particleSystem->draw(projection, view, cameras[View].Front, glm::vec3(10.0f));
 		}
 	}
+	glGetError();
 }
 
 void Game::ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset)
