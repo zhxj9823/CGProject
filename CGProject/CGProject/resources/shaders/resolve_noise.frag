@@ -117,8 +117,8 @@ vec4 cast_ray(vec3 origin, vec3 dir) {
 	float end = 500.0;
 
 	vec4 value = vec4(0.0);
-	vec3 cloud_bright = vec3(254, 254, 250) * 0.03;//vec3(4.95, 4.8, 4.75);
-	vec3 cloud_dark = vec3(0.6558441558, 0.9465648855, 1.55);//vec3(0.624, 0.777, 0.8805);//vec3(0.416, 0.518, 0.694); //vec3(0.671, 0.725, 0.753);
+	vec3 cloud_bright = vec3(254, 254, 250) * 0.02;//vec3(4.95, 4.8, 4.75);
+	vec3 cloud_dark = vec3(0.416, 0.518, 0.694); //vec3(0.6558441558, 0.9465648855, 1.55);//vec3(0.624, 0.777, 0.8805);//vec3(0.671, 0.725, 0.753);
 	value.rgb = cloud_dark;
 
 	float length_inside = 0.0;
