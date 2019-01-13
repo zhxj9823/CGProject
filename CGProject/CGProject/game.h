@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 #include <vector>
+#include<list>
 #include <tuple>
 
 #include <glad/glad.h>
@@ -11,6 +12,8 @@
 #include <irrKlang/irrKlang.h>
 
 #include "text_renderer.h"
+#include "renderer.h"
+#include"ParticleSystem.h"
 
 // Represents the current state of the game
 enum GameState {
@@ -23,6 +26,18 @@ enum GameState {
 enum GameView {
 	FIRST_PERSON,
 	THIRD_PERSON
+};
+
+struct explosionParticle {
+	ParticleGenerator* particleSystem;
+	GLfloat life;
+	glm::vec3 position;
+
+	explosionParticle(Shader shader, Texture2D texture, GLuint amount, GLfloat life, glm::vec3 pos)
+		:particleSystem(new ParticleGenerator(shader, texture, amount)), life(life), position(pos)
+	{
+
+	}
 };
 
 // Game holds all game-related state and functionality.
@@ -41,7 +56,17 @@ public:
 	Camera cameras[2];
 	irrklang::ISoundEngine *SoundEngine;
 	TextRenderer *Text;
+	Renderer *missle;
+	Renderer *Plane;
+	Shader skyboxShader;
+	GLuint skyboxVAO, skyboxVBO;
+	GLuint skyboxTexture;
+	GLfloat rendernear;
+	GLfloat renderfar;
+	GLuint depthMapFBO;
+	GLuint depthMap;
 	std::vector<GameObject> GameObjects;
+	std::list<explosionParticle*> explosionParticles;
 	// Constructor/Destructor
 	Game(GLuint width, GLuint height);
 	~Game();
@@ -51,6 +76,7 @@ public:
 	void ProcessInput(GLfloat dt);
 	void Update(GLfloat dt);
 	void Render();
+	void CreatMissle();
 	void ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset);
 	void ProcessMouseScroll(GLfloat yoffset);
 };

@@ -8,6 +8,7 @@
 
 #include "texture.h"
 #include "shader.h"
+#include "model.h"
 
 
 // A static singleton ResourceManager class that hosts several
@@ -21,6 +22,7 @@ public:
 	// Resource storage
 	static std::map<std::string, Shader>    Shaders;
 	static std::map<std::string, Texture2D> Textures;
+	static std::map<std::string, Model>		Models;
 	// Loads (and generates) a shader program from file loading vertex, fragment (and geometry) shader's source code. If gShaderFile is not nullptr, it also loads a geometry shader
 	static Shader   LoadShader(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile, std::string name);
 	// Retrieves a stored sader
@@ -29,6 +31,8 @@ public:
 	static Texture2D LoadTexture(const GLchar *file, GLboolean alpha, std::string name);
 	// Retrieves a stored texture
 	static Texture2D GetTexture(std::string name);
+	static Model	LoadModel(string const &path,std::string name);
+	static Model	GetModel(std::string name);
 	// Properly de-allocates all loaded resources
 	static void      Clear();
 private:
@@ -38,6 +42,8 @@ private:
 	static Shader    loadShaderFromFile(const GLchar *vShaderFile, const GLchar *fShaderFile, const GLchar *gShaderFile = nullptr);
 	// Loads a single texture from file
 	static Texture2D loadTextureFromFile(const GLchar *file, GLboolean alpha);
+	// Loads a model from file
+	static Model loadModelFromFile(std::string const &path);
 };
 
 #endif
