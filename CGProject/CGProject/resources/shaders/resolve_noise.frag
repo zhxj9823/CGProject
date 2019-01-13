@@ -221,7 +221,7 @@ void main() {
 	fcolor.rgb = mix(diffuse_color.rgb, cloud_color.rgb, cloud_color.a);
 
 	float brightness = dot(fcolor.rgb, vec3(0.2126, 0.7152, 0.0722));
-    if(brightness > 500.0) {
+    if(brightness > 1000.0) {
         bright_color = vec4(fcolor.rgb, 1.0);
 	}
 
