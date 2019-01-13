@@ -58,6 +58,9 @@ public:
 	TextRenderer *Text;
 	Renderer *missle;
 	Renderer *Plane;
+	Shader skyboxShader;
+	GLuint skyboxVAO, skyboxVBO;
+	GLuint skyboxTexture;
 	GLfloat rendernear;
 	GLfloat renderfar;
 	std::vector<GameObject> GameObjects;

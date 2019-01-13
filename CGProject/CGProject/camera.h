@@ -7,8 +7,6 @@
 
 #include <vector>
 
-#include "game.h"
-
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
 	FORWARD,
@@ -34,8 +32,6 @@ public:
 	glm::vec3 Front;
 	glm::vec3 Up;
 	glm::vec3 Right;
-	glm::vec3 PlaneUp;
-	glm::vec3 PlaneRight;
 	glm::vec3 WorldUp;
 	// Euler Angles
 	GLfloat Yaw;
@@ -45,13 +41,14 @@ public:
 	GLfloat MouseSensitivity;
 	GLfloat Zoom;
 
-	GameView gameview;
+
+	int GameView;
 
 	// Constructor with vectors
-	Camera(GameView t,glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH);
+	Camera(int t = 0, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH);
 
 	// Constructor with scalar values
-	Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch);
+	Camera(int t,float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch);
 
 	// Returns the view matrix calculated using Euler Angles and the LookAt Matrix
 	glm::mat4 GetViewMatrix();
@@ -64,6 +61,7 @@ public:
 
 	// Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
 	void ProcessMouseScroll(float yoffset);
+
 
 private:
 	// Calculates the front vector from the Camera's (updated) Euler Angles
