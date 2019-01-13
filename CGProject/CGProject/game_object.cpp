@@ -9,9 +9,9 @@ GameObject::GameObject(glm::vec3 pos, glm::vec3 size,glm::vec3 velocity):
 	this->Right = glm::normalize(glm::cross(Up, Velocity));
 }
 
- void GameObject::Draw(Renderer & renderer,Camera & camera)
+ void GameObject::Draw(Shader shader,Renderer & renderer,Camera & camera)
 {
-	 renderer.DrawPlane(this->Position, this->Size, this->Up, this->Right, camera);
+	 renderer.DrawPlane(shader, this->Position, this->Size, this->Up, this->Right, camera);
 }
  glm::vec3 GameObject::Move(GLfloat dt)
  {

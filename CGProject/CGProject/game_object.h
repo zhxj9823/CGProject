@@ -22,7 +22,7 @@ public:
 	GameObject();
 	GameObject(glm::vec3 pos, glm::vec3 size,glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f));
 	// Draw
-	virtual void Draw(Renderer & renderer,Camera & camera);
+	virtual void Draw(Shader shader, Renderer & renderer,Camera & camera);
 	glm::vec3 Move(GLfloat dt);
 	double Distance(glm::vec3 center);
 };

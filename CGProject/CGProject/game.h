@@ -60,6 +60,8 @@ public:
 	Renderer *Plane;
 	GLfloat rendernear;
 	GLfloat renderfar;
+	GLuint depthMapFBO;
+	GLuint depthMap;
 	std::vector<GameObject> GameObjects;
 	std::list<explosionParticle*> explosionParticles;
 	// Constructor/Destructor
