@@ -25,7 +25,7 @@ public:
 	GameObject(glm::vec3 pos, glm::vec3 size, glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f));
 	GameObject(glm::vec3 center);
 	// Draw
-	virtual void Draw(Renderer & renderer,Camera & camera);
+	virtual void Draw(Shader shader, Renderer & renderer,Camera & camera);
 	glm::vec3 Move(GLfloat dt);
 	double Distance(glm::vec3 center);
 	void ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime);

@@ -5,7 +5,7 @@
 
 GLboolean CheckCollision(GameObject &one, GameObject &two)
 {
-glm::vec3 size= glm::vec3(10.0f,10.0f,10.0f);
+	glm::vec3 size= glm::vec3(10.0f,10.0f,10.0f);
 
 	// Collision x-axis?
 	bool collisionX = one.Position.x + size.x >= two.Position.x &&
