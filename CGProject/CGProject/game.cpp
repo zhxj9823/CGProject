@@ -342,7 +342,7 @@ void Game::Render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-	glm::vec3 lightPos(-20.0f, 40.0f, -10.0f);
+	glm::vec3 lightPos(10*glm::cos(glfwGetTime()), 10.0f, 10*glm::sin(glfwGetTime()));
 	// 1. render depth of scene to texture (from light's perspective)
 	// --------------------------------------------------------------
 	glm::mat4 lightProjection, lightView;

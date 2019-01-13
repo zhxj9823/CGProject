@@ -14,12 +14,12 @@ Renderer::Renderer(Model plane)
 void Renderer::DrawPlane(Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 Up, glm::vec3 Right, Camera & camera)
 {
 	// Activate corresponding render state	
-	shader.Use();
+	//shader.Use();
 	// view/projection transformations
-	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
-	glm::mat4 view = camera.GetViewMatrix();
-	shader.SetMatrix4("projection", projection);
-	shader.SetMatrix4("view", view);
+	//glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+	//glm::mat4 view = camera.GetViewMatrix();
+	//shader.SetMatrix4("projection", projection);
+	//shader.SetMatrix4("view", view);
 
 	// render the loaded model
 	glm::mat4 model = glm::mat4(1.0f);
