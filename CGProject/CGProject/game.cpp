@@ -61,7 +61,7 @@ void Game::Init()
 	ResourceManager::LoadShader("shaders/particle.vs", "shaders/particle.frag", nullptr, "particle");
 
 	rendernear = 0.1f;
-	renderfar = 5000.0f;
+	renderfar = 1000.0f;
 
 	glm::vec3 pos = cameras[FIRST_PERSON].Position;
 	glm::vec3 size = glm::vec3(0.5f);
@@ -106,6 +106,108 @@ void Game::Init()
 	ResourceManager::GetShader("plane").SetInteger("diffuseTexture", 0);
 	ResourceManager::GetShader("plane").SetInteger("shadowMap", 1);
 	glGetError();
+
+	ResourceManager::LoadShader("./resources/shaders/skybox.vert", "./resources/shaders/skybox.frag", nullptr, "skybox_shader");
+	skyboxShader = ResourceManager::GetShader("skybox_shader");
+	float skyboxVertices[] = {
+		// back
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		// left
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+		// right
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 // front
+		 -1.0f, -1.0f,  1.0f,
+		 -1.0f,  1.0f,  1.0f,
+		  1.0f,  1.0f,  1.0f,
+		  1.0f,  1.0f,  1.0f,
+		  1.0f, -1.0f,  1.0f,
+		 -1.0f, -1.0f,  1.0f,
+		 // top
+		 -1.0f,  1.0f, -1.0f,
+		  1.0f,  1.0f, -1.0f,
+		  1.0f,  1.0f,  1.0f,
+		  1.0f,  1.0f,  1.0f,
+		 -1.0f,  1.0f,  1.0f,
+		 -1.0f,  1.0f, -1.0f,
+		 // bottom
+		 -1.0f, -1.0f, -1.0f,
+		 -1.0f, -1.0f,  1.0f,
+		  1.0f, -1.0f, -1.0f,
+		  1.0f, -1.0f, -1.0f,
+		 -1.0f, -1.0f,  1.0f,
+		  1.0f, -1.0f,  1.0f
+	};
+
+	// skybox VAO
+	//unsigned int skyboxVAO, skyboxVBO;
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+	//glCheckError();
+	std::vector<std::string> faces
+	{
+		"resources/textures/skybox/right.jpg",
+		"resources/textures/skybox/left.jpg",
+		"resources/textures/skybox/top.jpg",
+		"resources/textures/skybox/bottom.jpg",
+		"resources/textures/skybox/front.jpg",
+		"resources/textures/skybox/back.jpg"
+	};
+
+	//unsigned int skyboxTexture;
+	glGenTextures(1, &skyboxTexture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
+
+	int width, height, nrChannels;
+
+	// draw six faces: right, left, top, bottom, front, back
+	for (unsigned int i = 0; i < 6; i++)
+	{
+		unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	//glCheckError();
+	// set texture uniform
+	skyboxShader = ResourceManager::GetShader("skybox_shader");
+	skyboxShader.Use();
+	skyboxShader.SetInteger("skybox", 0);
+	//glCheckError();
 }
 
 void Game::Update(GLfloat dt)
@@ -240,14 +342,14 @@ void Game::Render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-	glm::vec3 lightPos(-2.0f, 4.0f, -1.0f);
+	glm::vec3 lightPos(-20.0f, 40.0f, -10.0f);
 	// 1. render depth of scene to texture (from light's perspective)
 	// --------------------------------------------------------------
 	glm::mat4 lightProjection, lightView;
 	glm::mat4 lightSpaceMatrix;
 	float near_plane = 1.0f, far_plane = 7.5f;
 	lightProjection = glm::perspective(glm::radians(45.0f), (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT, near_plane, far_plane); // note that if you use a perspective projection matrix you'll have to change the light position as the current light position isn't enough to reflect the whole scene
-	lightProjection = glm::ortho(-100.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+	//lightProjection = glm::ortho(-100.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
 	lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 	lightSpaceMatrix = lightProjection * lightView;
 	// render scene from light's point of view
@@ -306,6 +408,23 @@ void Game::Render()
 			es->particleSystem->draw(projection, view, cameras[View].Front, glm::vec3(10.0f));
 		}
 	}
+	// draw skybox
+	glDepthFunc(GL_LEQUAL);
+	//glDepthMask(GL_FALSE);
+	skyboxShader.Use();
+	projection = glm::perspective(glm::radians(cameras[View].Zoom), (float)Width / (float)Height, 0.1f, 1000.0f);
+	view = glm::mat4(glm::mat3(cameras[View].GetViewMatrix())); // reset the view matrix
+	skyboxShader.SetMatrix4("projection", projection);  // set projection uniform to the shader
+	skyboxShader.SetMatrix4("view", view); // set view uniform to the shader
+
+	// skybox cube
+	glBindVertexArray(skyboxVAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	//glDepthMask(GL_TRUE); // set depth function back to default
+	glDepthFunc(GL_LESS);
 	glGetError();
 }
 

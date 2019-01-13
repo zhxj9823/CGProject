@@ -62,6 +62,8 @@ public:
 	GLfloat renderfar;
 	GLuint depthMapFBO;
 	GLuint depthMap;
+	GLuint skyboxVAO, skyboxVBO, skyboxTexture;
+	Shader skyboxShader;
 	std::vector<GameObject> GameObjects;
 	std::list<explosionParticle*> explosionParticles;
 	// Constructor/Destructor
