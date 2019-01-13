@@ -19,12 +19,12 @@
 class Renderer
 {
 public:
-	Renderer(Model plane);
-	void DrawPlane(Shader shader, glm::vec3 position, glm::vec3 size, glm::vec3 Up, glm::vec3 Right, Camera & camera);
+	Renderer(Model plane, bool t);
+	void DrawPlane(Shader shader,glm::vec3 position, glm::vec3 size, glm::vec3 right, glm::vec3 up, Camera & camera);
 private:
 	// Render state
-	//Shader shader;
 	Model plane;
+	bool isPlane;
 };
 
 #endif 

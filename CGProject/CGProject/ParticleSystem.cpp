@@ -42,7 +42,7 @@ void ParticleGenerator::draw(const glm::mat4 & projection, const glm::mat4 & vie
 	this->shader.SetInteger("sprite", 0);
 	this->shader.SetMatrix4("projection", projection);
 	this->shader.SetMatrix4("view", view);
-	// 可能需要放到里面的循环里去
+	
 	glm::mat4 model = glm::mat4();
 	glm::vec3 v1 = glm::vec3(0.0f, 0.0f, 1.0f);
 	glm::vec3 v2 = camera_front;

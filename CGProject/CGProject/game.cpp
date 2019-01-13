@@ -23,8 +23,8 @@ Game::Game(GLuint width, GLuint height) : State(GAME_MENU), View(FIRST_PERSON), 
 	{
 		Keys[i] = false;
 	}
-	cameras[0] = Camera(glm::vec3(0.0f, 0.0f, 10.0f));
-	cameras[1] = Camera(glm::vec3(0.0f, 0.0f, 100.0f));
+	cameras[0] = Camera(0,glm::vec3(0.0f, 0.0f, 10.0f));
+	cameras[1] = Camera(1,glm::vec3(0.0f, 0.0f, 100.0f));
 }
 
 Game::~Game()
@@ -53,8 +53,8 @@ void Game::Init()
 	ResourceManager::LoadModel("su33/su33.obj", "su33");
 	ResourceManager::LoadModel("AVMT300/AIM120D3.obj", "AIM120D");
 	//ResourceManager::LoadModel("F-35A/F-35A.obj", "F35A");
-	plane = new Renderer(ResourceManager::GetModel("su33"));
-	missle = new Renderer(ResourceManager::GetModel("AIM120D"));
+	plane = new Renderer(ResourceManager::GetModel("su33"), true);
+	missle = new Renderer(ResourceManager::GetModel("AIM120D"), false);
 
 	ResourceManager::LoadTexture("./particle.png", GL_TRUE, "particle");
 	ResourceManager::LoadTexture("./flame.png", GL_TRUE, "flame");
@@ -65,17 +65,11 @@ void Game::Init()
 
 	glm::vec3 pos = cameras[FIRST_PERSON].Position;
 	glm::vec3 size = glm::vec3(0.5f);
-	glm::vec3 v = glm::vec3(0.0f, 0.0f, -0.1f);
+	glm::vec3 v = glm::vec3(0.0f, 0.0f, -1.0f);
 	Player = new GameObject(pos, size, v);
 	for (int i = 0; i < EnemyNum; i++)
 	{
-		double t = rand();
-		double h = (rand() % 1000) / 100 - 5;
-		pos = glm::vec3(100 * cos(t), h, 100 * sin(t));
-		t = rand();
-		double v1 = (rand() % 1000) / 100 + 3;
-		v = glm::vec3(v1 * cos(t), 0, v1 * sin(t));
-		Enemy[i] = new GameObject(pos, size, v);
+		Enemy[i] = new GameObject(cameras[FIRST_PERSON].Position);
 	}
 
 	ResourceManager::LoadShader("shaders/shadow_mapping_depth.vs", "shaders/shadow_mapping_depth.fs", nullptr, "simpleDepthShader");
@@ -212,74 +206,38 @@ void Game::Init()
 
 void Game::Update(GLfloat dt)
 {
-	cameras[FIRST_PERSON].Position += dt * Player->Velocity;
-	for (int i = 0; i < EnemyNum; i++)
-	{
+	Player->Update(dt);
+	for (int i = 0; i < EnemyNum; i++) {
 		Enemy[i]->Move(dt);
-		if (Enemy[i]->Destroyed || Enemy[i]->Distance(cameras[FIRST_PERSON].Position) > 100)
-		{
+		if (Enemy[i]->Destroyed || Enemy[i]->Distance(cameras[FIRST_PERSON].Position) > 100) {
 			delete Enemy[i];
-			glm::vec3 size = glm::vec3(0.5f);
-			double t = rand();
-			double h = (rand() % 1000) / 100 - 5;
-			glm::vec3 pos = glm::vec3(100 * cos(t), h, 100 * sin(t));
-			t = rand();
-			double v1 = (rand() % 1000) / 100 + 3;
-			glm::vec3 v = glm::vec3(v1 * cos(t), 0, v1 * sin(t));
-			Enemy[i] = new GameObject(pos, size, v);
+			Enemy[i] = new GameObject(cameras[FIRST_PERSON].Position);
 		}
 	}
 	for (int i = 0; i < missles.size(); i++)
 	{
 		missles[i].Move(dt);
-		if (missles[i].Destroyed || missles[i].Distance(cameras[FIRST_PERSON].Position) > 100)
-		{
+		if (missles[i].Destroyed || missles[i].Distance(cameras[FIRST_PERSON].Position) > 100) {
 			missles.erase(missles.begin() + i);
 			i--;
 		}
-		//delete &missle;
 	}
-	Player->Position = cameras[FIRST_PERSON].Position;
-	Player->Up = cameras[FIRST_PERSON].PlaneUp;
-	Player->Right = cameras[FIRST_PERSON].PlaneRight;
-	/*
-	for (auto &object1 : GameObjects)
-	{
-		for (auto &missle : missles) {
-			if (CheckCollision(object1, missle)) {
-				//爆炸
-				explosionParticle *newep = new explosionParticle(ResourceManager::GetShader("particle"), ResourceManager::GetTexture("flame"), 50, 0.5f, object1.Position);
-				explosionParticles.push_back(newep);
-			}
-
-		}
-	}*/
-
+	cameras[FIRST_PERSON].Position = Player->Position;
+	
 	for (int i = 0; i < EnemyNum; i++)
 	{
-		for (auto &missle : missles)
-		{
-			if (CheckCollision(*Enemy[i], missle))
-			{
+		for (auto &missle : missles) {
+			if (CheckCollision(*Enemy[i], missle)) {
 				//爆炸
 				explosionParticle *newep = new explosionParticle(ResourceManager::GetShader("particle"), ResourceManager::GetTexture("flame"), 50, 0.5f, Enemy[i]->Position);
 				explosionParticles.push_back(newep);
 				Enemy[i]->Destroyed = true;
 				missle.Destroyed = true;
 			}
+
 		}
 	}
 
-	/*
-	for (int i = 0; i < EnemyNum; i++)
-	{
-		if (CheckCollision(*Enemy[i], *Player)) {
-			//爆炸
-			explosionParticle *newep = new explosionParticle(ResourceManager::GetShader("particle"), ResourceManager::GetTexture("flame"), 50, 0.5f, Player->Position);
-			explosionParticles.push_back(newep);
-		}
-
-	}*/
 	for (auto &es : explosionParticles)
 	{
 		es->life -= dt;
@@ -295,28 +253,30 @@ void Game::ProcessInput(GLfloat dt)
 		if (Keys[GLFW_KEY_W])
 		{
 			cameras[View].ProcessKeyboard(FORWARD, dt);
+			Player->ProcessKeyboard(FORWARD, dt);
 		}
 		if (Keys[GLFW_KEY_S])
 		{
 			cameras[View].ProcessKeyboard(BACKWARD, dt);
+			Player->ProcessKeyboard(BACKWARD, dt);
 		}
 		if (Keys[GLFW_KEY_A])
 		{
 			cameras[View].ProcessKeyboard(LEFT, dt);
+			Player->ProcessKeyboard(LEFT, dt);
 		}
 		if (Keys[GLFW_KEY_D])
 		{
 			cameras[View].ProcessKeyboard(RIGHT, dt);
+			Player->ProcessKeyboard(RIGHT, dt);
 		}
 		if (Keys[GLFW_KEY_LEFT_SHIFT] || Keys[GLFW_KEY_RIGHT_SHIFT])
 		{
 			View = (View == FIRST_PERSON) ? THIRD_PERSON : FIRST_PERSON;
 		}
-		if (Keys[GLFW_KEY_SPACE])
-		{
+		if (Keys[GLFW_KEY_SPACE]) {
 			GLfloat currentTime = glfwGetTime();
-			if (currentTime - lastTime >= 2.0f)
-			{
+			if (currentTime - lastTime >= 2.0f) {
 				CreatMissle();
 				lastTime = currentTime;
 			}
@@ -324,13 +284,13 @@ void Game::ProcessInput(GLfloat dt)
 	}
 }
 
-void Game::CreatMissle()
-{
+void Game::CreatMissle() {
 	glm::vec3 pos = cameras[FIRST_PERSON].Position;
 	glm::vec3 size = glm::vec3(0.05f);
-	glm::vec3 v = 20.0f * glm::normalize(glm::cross(cameras[FIRST_PERSON].Up, cameras[FIRST_PERSON].Right));
+	glm::vec3 v = 50.0f*glm::normalize(glm::cross(cameras[FIRST_PERSON].Up, cameras[FIRST_PERSON].Right));
+	glm::vec3 up = cameras[FIRST_PERSON].Up;
 
-	GameObject *missle = new GameObject(pos, size, v);
+	GameObject *missle = new GameObject(pos, size, v, up);
 	missles.push_back(*missle);
 }
 
@@ -401,6 +361,7 @@ void Game::Render()
 	glGetError();
 	projection = glm::perspective(cameras[View].Zoom, (float)this->Width / (float)this->Height, rendernear, renderfar);
 	view = cameras[View].GetViewMatrix();
+	glDisable(GL_DEPTH_TEST);
 	for (auto &es : explosionParticles)
 	{
 		if (es->life > 0)
@@ -408,6 +369,7 @@ void Game::Render()
 			es->particleSystem->draw(projection, view, cameras[View].Front, glm::vec3(10.0f));
 		}
 	}
+	glEnable(GL_DEPTH_TEST);
 	// draw skybox
 	glDepthFunc(GL_LEQUAL);
 	//glDepthMask(GL_FALSE);
