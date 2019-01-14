@@ -24,12 +24,11 @@ void main() {
 	vec3 bloomColor = texelFetch(bloom_blur, ivec2(gl_FragCoord.xy), 0).rgb;
 	hdrColor += bloomColor;
 	
-	// Reinhard tone mapping
-	vec3 mapped = ACESToneMapping(hdrColor, 0.7);
+	vec3 mapped = ACESToneMapping(hdrColor, 0.3);
 	// Exposure tone mapping
 	//vec3 mapped = vec3(1.0) - exp(-hdrColor * exposure);
 	// Gamma correction 
-	//mapped = pow(mapped, vec3(1.0 / gamma));
+	mapped = pow(mapped, vec3(1.0 / gamma));
 	
 	frag_color = vec4(mapped, 1.0);
 }

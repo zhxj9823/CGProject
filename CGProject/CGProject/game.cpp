@@ -4,6 +4,7 @@
 #include <time.h>
 
 #include "game.h"
+
 #include "resource_manager.h"
 #include "game_object.h"
 #include "PhysicsEngine.h"
@@ -49,6 +50,14 @@ void Game::Init()
 	Text->Load("fonts/ocraext.TTF", 24);
 
 	// Load shaders
+	ResourceManager::LoadShader("./resources/shaders/resolve.vert", "./resources/shaders/resolve_noise.frag", nullptr, "resolve_shader");
+	ResourceManager::LoadShader("./resources/shaders/blur.vert", "./resources/shaders/blur.frag", nullptr, "blur_shader");
+	ResourceManager::LoadShader("./resources/shaders/post.vert", "./resources/shaders/post.frag", nullptr, "post_shader");
+	//ResourceManager::LoadShader("./resources/shaders/skybox.vert", "./resources/shaders/skybox.frag", nullptr, "skybox_shader");
+		
+	framebuffer_scene_init(&scene_framebuffer, Width, Height);
+	framebuffer_cloud_init(&cloud_framebuffer, Width, Height);
+	framebuffer_pingpong_init(pingpong_framebuffer, Width, Height);
 	ResourceManager::LoadShader("shaders/model_loading.vs", "shaders/model_loading.fs", nullptr, "plane");
 	ResourceManager::LoadModel("su33/su33.obj", "su33");
 	ResourceManager::LoadModel("AVMT300/AIM120D3.obj", "AIM120D");
@@ -59,6 +68,19 @@ void Game::Init()
 	ResourceManager::LoadTexture("./particle.png", GL_TRUE, "particle");
 	ResourceManager::LoadTexture("./flame.png", GL_TRUE, "flame");
 	ResourceManager::LoadShader("shaders/particle.vs", "shaders/particle.frag", nullptr, "particle");
+
+// Load textures
+	//ResourceManager::LoadTexture2DFromEx5("./resources/textures/terrain.ex5", "terrain");
+	ResourceManager::LoadTexture3DFromEx5("./resources/textures/noise5.ex5","cloud");
+	ResourceManager::LoadTexture1DPhase("./resources/textures/phase.txt", "mie_texture");
+	
+	ResourceManager::cloud_preprocess(ResourceManager::GetTexture("cloud"),"cloud_structure_texture");
+
+	ResourceManager::GetShader("resolve_shader").Use();
+	ResourceManager::SendShaderTexture3D(ResourceManager::GetShader("resolve_shader"), ResourceManager::GetTexture("cloud"), "cloud_texture");
+	ResourceManager::SendShaderTexture3D(ResourceManager::GetShader("resolve_shader"), ResourceManager::GetTexture("cloud_structure_texture"), "cloud_structure");
+	//ResourceManager::SendShaderTexture2D(ResourceManager::GetShader("terrain_shader"), ResourceManager::GetTexture("terrain"), "terrain_texture");
+	ResourceManager::SendShaderTexture1D(ResourceManager::GetShader("resolve_shader"), ResourceManager::GetTexture("mie_texture"), "mie_texture");
 
 	rendernear = 0.1f;
 	renderfar = 1000.0f;
@@ -102,7 +124,7 @@ void Game::Init()
 	glGetError();
 
 	ResourceManager::LoadShader("./resources/shaders/skybox.vert", "./resources/shaders/skybox.frag", nullptr, "skybox_shader");
-	skyboxShader = ResourceManager::GetShader("skybox_shader");
+	//skyboxShader = ResourceManager::GetShader("skybox_shader");
 	float skyboxVertices[] = {
 		// back
 		-1.0f,  1.0f, -1.0f,
@@ -296,13 +318,25 @@ void Game::CreatMissle() {
 
 void Game::Render()
 {
-	Text->RenderText("Press W or S to select level", 245.0f, Height / 2 + 20.0f, 0.75f); // Begin rendering to postprocessing quad
+	//Text->RenderText("Press W or S to select level", 245.0f, Height / 2 + 20.0f, 0.75f); // Begin rendering to postprocessing quad
+	glm::mat4 view = cameras[View].GetViewMatrix();
+	glm::mat4 projection = glm::perspective(glm::radians(cameras[View].Zoom), (float)Width / (float)Height, 0.1f, 1000.0f);
+	//glm::mat4 model;
+	//model = glm::translate(model, glm::vec3(0.0f,-10.0f,0.0f));
+	glm::vec3 lightPos(100 * glm::cos(glfwGetTime()), 100.0f, 100 * glm::sin(glfwGetTime()));
 
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	ResourceManager::GetShader("resolve_shader").Use();
+	ResourceManager::GetShader("resolve_shader").SetMatrix4("view", view);
+	ResourceManager::GetShader("resolve_shader").SetMatrix4("proj", projection);
+	//ResourceManager::GetShader("resolve_shader").SetMatrix4("model", model);
+	ResourceManager::GetShader("resolve_shader").SetMatrix4("inv_view", glm::mat4(glm::inverse(view)));
+	ResourceManager::GetShader("resolve_shader").SetMatrix4("inv_proj", glm::mat4(glm::inverse(projection)));
+	ResourceManager::GetShader("resolve_shader").SetVector2f("view_port", glm::vec2(Width, Height));
+	ResourceManager::GetShader("resolve_shader").SetVector3f("camera_pos", glm::vec3(cameras[View].Position));
+	ResourceManager::GetShader("resolve_shader").SetVector3f("sun_pos", lightPos);
 
 	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-	glm::vec3 lightPos(100*glm::cos(glfwGetTime()), 100.0f, 100*glm::sin(glfwGetTime()));
+	
 	// 1. render depth of scene to texture (from light's perspective)
 	// --------------------------------------------------------------
 	glm::mat4 lightProjection, lightView;
@@ -328,19 +362,20 @@ void Game::Render()
 		misslee.Draw(ResourceManager::GetShader("simpleDepthShader"), *missle, cameras[FIRST_PERSON]);
 	}
 	Player->Draw(ResourceManager::GetShader("simpleDepthShader"), *plane, cameras[FIRST_PERSON]);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
+	/* Render skybox and text */
+	glBindFramebuffer(GL_FRAMEBUFFER, scene_framebuffer.fbo);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glGetError();
 	// reset viewport
-	glViewport(0, 0, Width, Height);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// 2. render scene as normal using the generated depth/shadow map
 	// --------------------------------------------------------------
 	glViewport(0, 0, Width, Height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	ResourceManager::GetShader("plane").Use();
-	glm::mat4 projection = glm::perspective(glm::radians(cameras[View].Zoom), (float)Width / (float)Height, rendernear, renderfar);
-	glm::mat4 view = cameras[View].GetViewMatrix();
+	projection = glm::perspective(glm::radians(cameras[View].Zoom), (float)Width / (float)Height, rendernear, renderfar);
+	view = cameras[View].GetViewMatrix();
 	ResourceManager::GetShader("plane").SetMatrix4("projection", projection);
 	ResourceManager::GetShader("plane").SetMatrix4("view", view);
 	// set light uniforms
@@ -370,6 +405,7 @@ void Game::Render()
 		}
 	}
 	glEnable(GL_DEPTH_TEST);
+
 	// draw skybox
 	glDepthFunc(GL_LEQUAL);
 	//glDepthMask(GL_FALSE);
@@ -388,6 +424,54 @@ void Game::Render()
 	//glDepthMask(GL_TRUE); // set depth function back to default
 	glDepthFunc(GL_LESS);
 	glGetError();
+
+	
+	/* Render clouds via resolve shader */
+	glBindFramebuffer(GL_FRAMEBUFFER, cloud_framebuffer.fbo);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	ResourceManager::GetShader("resolve_shader").Use();
+		
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D, scene_framebuffer.color_buffer[0]);	
+	GLuint diffuse_buffer = glGetUniformLocation(ResourceManager::GetShader("resolve_shader").ID, "diffuse_buffer");
+	glUniform1i(diffuse_buffer, 10);
+
+	render_quad();
+	
+	/* Pinpong buffers for bloom */
+	GLboolean horizontal = true, first_iteration = true;
+	GLuint amount = 10;
+	ResourceManager::GetShader("blur_shader").Use();
+	for (GLuint i = 0; i < amount; i++) {
+		glBindFramebuffer(GL_FRAMEBUFFER, pingpong_framebuffer[horizontal].fbo);
+		glUniform1i(glGetUniformLocation(ResourceManager::GetShader("blur_shader").ID, "horizontal"), horizontal);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, first_iteration ? cloud_framebuffer.color_buffer[1] : pingpong_framebuffer[!horizontal].color_buffer[0]);
+		GLuint image = glGetUniformLocation(ResourceManager::GetShader("blur_shader").ID, "image");
+		glUniform1i(image, 5);
+		render_quad();		
+		horizontal = !horizontal;
+		if (first_iteration)
+			first_iteration = false;
+	}
+	
+	/* Render to screen via post shader */
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	ResourceManager::GetShader("post_shader").Use();	
+	glActiveTexture(GL_TEXTURE11);
+	glBindTexture(GL_TEXTURE_2D, cloud_framebuffer.color_buffer[0]);
+	GLuint hdr_buffer = glGetUniformLocation(ResourceManager::GetShader("post_shader").ID, "HDR_buffer");
+	glUniform1i(hdr_buffer, 11);
+
+	glActiveTexture(GL_TEXTURE12);
+	glBindTexture(GL_TEXTURE_2D, pingpong_framebuffer[!horizontal].color_buffer[0]);
+	GLuint bloom = glGetUniformLocation(ResourceManager::GetShader("post_shader").ID, "bloom_blur");
+	glUniform1i(bloom, 12);
+	
+	render_quad();	
 }
 
 void Game::ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset)
@@ -401,4 +485,33 @@ void Game::ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset)
 void Game::ProcessMouseScroll(GLfloat yoffset)
 {
 	cameras[View].ProcessMouseScroll(yoffset);
+}
+
+void Game::render_quad()
+{
+	static GLuint quad_vao = 0;
+	static GLuint quad_vbo = 0;
+	if (quad_vao == 0) {
+		GLfloat quadVertices[] = {
+			// Positions        // Texture Coords
+			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+			1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		};
+		glGenVertexArrays(1, &quad_vao);
+		glGenBuffers(1, &quad_vbo);
+		glBindVertexArray(quad_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, quad_vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(0);
+		
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(1);
+	}
+	glBindVertexArray(quad_vao);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
 }

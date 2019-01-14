@@ -41,7 +41,7 @@ double GameObject::Distance(glm::vec3 center)
 }
 void GameObject::ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime)
 {
-	float t = 10.0f;
+	float t = 3.0f;
 	if (direction == FORWARD)
 		Acceleration = (WorldUp)* t*3.0f;
 	if (direction == BACKWARD)

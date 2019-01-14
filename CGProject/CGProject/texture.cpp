@@ -2,14 +2,15 @@
 
 #include "texture.h"
 
-
-Texture2D::Texture2D()
-	: Width(0), Height(0), Internal_Format(GL_RGB), Image_Format(GL_RGB), Wrap_S(GL_REPEAT), Wrap_T(GL_REPEAT), Filter_Min(GL_LINEAR), Filter_Max(GL_LINEAR)
+static int active_textures = 0;
+Texture::Texture()
+	: Width(0), Height(0), Depth(0),Internal_Format(GL_RGB), Image_Format(GL_RGB), Wrap_S(GL_REPEAT), Wrap_T(GL_REPEAT), Filter_Min(GL_LINEAR), Filter_Max(GL_LINEAR)
 {
 	glGenTextures(1, &this->ID);
+	this->index = active_textures++;
 }
 
-void Texture2D::Generate(GLuint width, GLuint height, unsigned char* data)
+void Texture::Generate(GLuint width, GLuint height, unsigned char* data)
 {
 	this->Width = width;
 	this->Height = height;
@@ -25,7 +26,7 @@ void Texture2D::Generate(GLuint width, GLuint height, unsigned char* data)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture2D::Bind() const
+void Texture::Bind() const
 {
 	glBindTexture(GL_TEXTURE_2D, this->ID);
 }

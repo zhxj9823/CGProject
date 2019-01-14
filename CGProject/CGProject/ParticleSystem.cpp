@@ -1,7 +1,7 @@
 #include "ParticleSystem.h"
 #include <iostream>
 
-ParticleGenerator::ParticleGenerator(Shader shader, Texture2D texture, GLuint amount)
+ParticleGenerator::ParticleGenerator(Shader shader, Texture texture, GLuint amount)
 	: shader(shader), texture(texture), amount(amount)
 {
 	init();

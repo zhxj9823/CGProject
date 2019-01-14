@@ -28,7 +28,7 @@ class Model
 {
 public:
 	/*  Model Data */
-	vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
+	vector<ourTexture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 	vector<Mesh> meshes;
 	string directory;
 	bool gammaCorrection;
@@ -53,7 +53,7 @@ private:
 
 	// checks all material textures of a given type and loads the textures if they're not loaded yet.
 	// the required info is returned as a Texture struct.
-	vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName);
+	vector<ourTexture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName);
 };
 
 
