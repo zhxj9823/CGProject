@@ -7,7 +7,8 @@
 
 #include "renderer.h"
 #include "camera.h"
-
+#include "ParticleSystem.h"
+#include "ParticleSystemSmoke.h"
 
 // Container object for holding all state relevant for a single
 // game object entity. Each object in the game likely needs the
@@ -24,6 +25,7 @@ public:
 	GameObject();
 	GameObject(glm::vec3 pos, glm::vec3 size, glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f));
 	GameObject(glm::vec3 center);
+	ParticleGeneratorSmoke *particleGeneratorSmoke = NULL;
 	// Draw
 	virtual void Draw(Shader shader,Renderer & renderer, Camera & camera);
 	glm::vec3 Move(GLfloat dt);

@@ -126,6 +126,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="framebuffer.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="game_object.cpp" />
     <ClCompile Include="glad.c" />
@@ -133,6 +134,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
+    <ClCompile Include="ParticleSystemSmoke.cpp" />
     <ClCompile Include="PhysicsEngine.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="resource_manager.cpp" />
@@ -143,11 +145,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
+    <ClInclude Include="framebuffer.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="game_object.h" />
     <ClInclude Include="glError.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="ParticleSystem.h" />
+    <ClInclude Include="ParticleSystemSmoke.h" />
     <ClInclude Include="PhysicsEngine.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="resource_manager.h" />

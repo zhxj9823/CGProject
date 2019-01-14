@@ -1,7 +1,7 @@
 #include "ParticleSystem.h"
 #include <iostream>
 
-ParticleGenerator::ParticleGenerator(Shader shader, Texture2D texture, GLuint amount)
+ParticleGenerator::ParticleGenerator(Shader shader, Texture texture, GLuint amount)
 	: shader(shader), texture(texture), amount(amount)
 {
 	init();
@@ -60,7 +60,7 @@ void ParticleGenerator::draw(const glm::mat4 & projection, const glm::mat4 & vie
 		if (particle.life > 0.0f)
 		{
 
-			model = glm::mat4();
+			model = glm::mat4(1.0f);
 			model = glm::translate(model, particle.position);
 			model = glm::rotate(model, angle, normal_vec);
 			model = glm::scale(model, scale);
@@ -143,8 +143,8 @@ void ParticleGenerator::respawnParticle(Particle &particle, glm::vec3 pos, glm::
 	GLfloat rColor = 0.5 + ((rand() % 100) / 100.0f);
 	particle.position = pos + offset;
 	particle.color = glm::vec4(rColor, rColor, rColor, 1.0f);
-	particle.life = 0.3f;
-	particle.velocity = velocity * 0.1f;
+	particle.life = 5.0f;
+	particle.velocity = velocity * 1.0f;
 	// std::cout << "set life to 1" << std::endl;
 
 }

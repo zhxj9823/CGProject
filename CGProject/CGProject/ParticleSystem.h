@@ -24,11 +24,11 @@ public:
 	GLuint amount;
 	// Render state
 	Shader shader;
-	Texture2D texture;
+	Texture texture;
 	GLuint VAO;
 
 	// Constructor
-	ParticleGenerator(Shader shader, Texture2D texture, GLuint amount);
+	ParticleGenerator(Shader shader, Texture texture, GLuint amount);
 	// Initializes buffer and vertex attributes
 	void init();
 	// Render all particles

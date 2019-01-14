@@ -1,5 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
+
 #include <vector>
 #include<list>
 #include <tuple>
@@ -9,11 +10,14 @@
 
 #include "camera.h"
 #include "game_object.h"
+#include "framebuffer.h"
+#include "stb_image.h"
 #include <irrKlang/irrKlang.h>
 
 #include "text_renderer.h"
 #include "renderer.h"
-#include"ParticleSystem.h"
+#include "ParticleSystem.h"
+#include "ParticleSystemSmoke.h"
 
 // Represents the current state of the game
 enum GameState {
@@ -33,11 +37,24 @@ struct explosionParticle {
 	GLfloat life;
 	glm::vec3 position;
 
-	explosionParticle(Shader shader, Texture2D texture, GLuint amount, GLfloat life, glm::vec3 pos)
+	explosionParticle(Shader shader, Texture texture, GLuint amount, GLfloat life, glm::vec3 pos)
 		:particleSystem(new ParticleGenerator(shader, texture, amount)), life(life), position(pos)
 	{
 
 	}
+};
+
+struct explosionParticleSmoke {
+	ParticleGeneratorSmoke* particleSystemSmoke;
+	GLfloat life;
+	glm::vec3 position;
+
+	explosionParticleSmoke(Shader shader, Texture texture, GLuint amount, GLfloat life, glm::vec3 pos)
+		:particleSystemSmoke(new ParticleGeneratorSmoke(shader, texture, amount)), life(life), position(pos)
+	{
+
+	}
+
 };
 
 // Game holds all game-related state and functionality.
@@ -67,6 +84,9 @@ public:
 	GLuint depthMap;
 	std::vector<GameObject> GameObjects;
 	std::list<explosionParticle*> explosionParticles;
+	Framebuffer scene_framebuffer;
+	Framebuffer cloud_framebuffer;
+	Framebuffer pingpong_framebuffer[2];
 	// Constructor/Destructor
 	Game(GLuint width, GLuint height);
 	~Game();
@@ -77,6 +97,7 @@ public:
 	void Update(GLfloat dt);
 	void Render();
 	void CreatMissle();
+	void render_quad();
 	void ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset);
 	void ProcessMouseScroll(GLfloat yoffset);
 };
